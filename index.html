@@ -574,7 +574,7 @@ document.getElementById('lbplay').onclick=function(){
    <div class="mprow"><input id="mpcode" maxlength="8" placeholder="Nhập mã phòng" autocomplete="off"><button class="gold mpbtn" id="mpjoinb">Vào phòng</button></div>
   </div>
   <div class="mpsec" id="mpsIn">
-   <div class="mpcodebox"><small>Mã phòng — gửi cho bạn bè</small><span id="mpcur"></span><button class="gold mpbtn" id="mpcopy">📋 Chép mã</button></div>
+   <div class="mpcodebox"><small>Mã phòng — gửi cho bạn bè</small><span id="mpcur"></span><button class="gold mpbtn" id="mpcopy">📋 Chép link mời</button></div>
    <div class="mpmem" id="mpmem"></div>
    <div class="mplist" id="mplist"></div>
    <div class="mpemo"><button>👋</button><button>👍</button><button>😂</button><button>⚔️</button><button>🔥</button><button>❤️</button></div>
@@ -3624,9 +3624,10 @@ window.SKIN_LIST=[{"id": "classic", "name": "Hải Tặc Cổ Điển", "shirt":
  }
  function copyCode(){
   const t=room;if(!t)return;
-  const done=()=>{const b=$('mpcopy');if(b){b.textContent='✔ Đã chép mã';setTimeout(()=>{b.textContent='📋 Chép mã'},1500)}};
-  const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove();done()};
-  try{navigator.clipboard.writeText(t).then(done,fb)}catch(_){fb()}
+  const link=location.href.split('#')[0]+'#join='+t;
+  const done=()=>{const b=$('mpcopy');if(b){b.textContent='✔ Đã chép link';setTimeout(()=>{b.textContent='📋 Chép link mời'},1500)}};
+  const fb=()=>{const a=document.createElement('textarea');a.value=link;a.style.cssText='position:fixed;opacity:0';document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(_){}a.remove();done()};
+  try{navigator.clipboard.writeText(link).then(done,fb)}catch(_){fb()}
  }
  function openUI(){const ov=$('mpov');if(!ov||ov.classList.contains('on'))return;ov.classList.add('on');render();emit('ui',true)}
  function closeUI(){const ov=$('mpov');if(!ov||!ov.classList.contains('on'))return;ov.classList.remove('on');emit('ui',false)}
@@ -3652,6 +3653,11 @@ window.SKIN_LIST=[{"id": "classic", "name": "Hải Tặc Cổ Điển", "shirt":
  });
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeUI()});
  setInterval(()=>{if(room&&ov.classList.contains('on'))renderMem()},1000);
+ // mở link mời (#join=MÃ): điền sẵn mã và mở bảng vào phòng
+ try{
+  const m=/[#&]join=([A-Za-z0-9]{4,12})/.exec(location.hash);
+  if(m&&!room){$('mpcode').value=m[1].toUpperCase();openUI();$('mpname').focus()}
+ }catch(_){}
  render();
 })();
 </script>
