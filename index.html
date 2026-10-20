@@ -1585,7 +1585,7 @@ IS.forEach(i=>{for(let k=0;k<(i.en||12);k++){const g=human(i.e,0xe0b090);scene.a
 function dmgPop(pos,d){const fx=$('fx');if(fx.childElementCount>24)return;const v=WV(pos,4.8).project(cam);if(v.z>1)return;const el=document.createElement('div');el.className='dn'+(d>=60?' big':'');el.textContent=Math.round(d);el.style.left=((v.x*.5+.5)*innerWidth+rnd(-14,14))+'px';el.style.top=((-v.y*.5+.5)*innerHeight)+'px';fx.appendChild(el);setTimeout(()=>el.remove(),850)}
 function levelFx(){sfx('light',1.2);banner('⭐ LÊN CẤP '+S.lv+' ⭐');const o=P.position.clone();o.y=GY+1;for(let i=0;i<48;i++){const a=i/48*6.28;spark(o,V(Math.cos(a)*16,rnd(3,9),Math.sin(a)*16),i%2?0xffe38a:0xffffff,.9,1.8)}}
 function gainXP(n){if(S.vip&&S.vip.xp)n*=2;S.xp+=n;while(S.xp>=need(S.lv)){S.xp-=need(S.lv);S.lv++;S.mh+=15;S.pts+=3;S.hp=mhp();S.en=men();toast('Lên cấp '+S.lv+'! +3 điểm chỉ số (Túi đồ → Chỉ số)');popTxt(P.position,'⭐ Lên cấp '+S.lv+'!','big',7.5);levelFx();save();try{renderQt()}catch(e){}}}
-function hurt(e,d){if(!e.alive)return;if(e.zst&&e.zst.ab>0)d*=1.15;e.hp-=d;RC.hit(d);e.flash=.15;{const now=performance.now();if(now-(e.pt||0)>130){e.pt=now;dmgPop(e.g.position,d);sfx('hit')}}if(e.hp<=0){e.alive=false;e.g.visible=false;e.bar.visible=false;const bm=e.boss?15:1;e.rt=e.rd?1e9:(e.boss?(e.nm==='Long Vương Hang Động'?300:90):6);gainXP((15+e.i.t*15)*bm);addMas((1+e.i.t)*(e.boss?5:1));S.beli+=(S.vip&&S.vip.bl?2:1)*Math.round((15+e.i.t*20)*bm*(S.faction==='pirate'?1.2:1));if(e.boss)bossDie(e);questKill(e);if(e.rd){const fg=e.boss?200:30;S.frag+=fg;popTxt(e.g.position,'+'+fg+' F','xp',9)}if(e.i.t>=9)sea2Loot(e);popTxt(e.g.position,'+'+(15+e.i.t*15)*bm+' XP','xp',7);popTxt(e.g.position,'+$'+Math.round((15+e.i.t*20)*bm*(S.faction==='pirate'?1.2:1)),'bl',8.8);burst(e.g.position.clone().setY(GY+2),10,0xffd23a,6);if(Math.random()<(e.boss?.25:.012+e.i.t*.002))fruitDrop(e)}}
+function hurt(e,d){if(!e.alive)return;if(window.MPK&&MPK.gate(e,d))return;if(e.zst&&e.zst.ab>0)d*=1.15;e.hp-=d;RC.hit(d);e.flash=.15;{const now=performance.now();if(now-(e.pt||0)>130){e.pt=now;dmgPop(e.g.position,d);sfx('hit')}}if(e.hp<=0){e.alive=false;e.g.visible=false;e.bar.visible=false;if(window.MPK&&MPK.quiet){e.rt=e.rd?1e9:(e.boss?90:6);return}const bm=e.boss?15:1;e.rt=e.rd?1e9:(e.boss?(e.nm==='Long Vương Hang Động'?300:90):6);gainXP((15+e.i.t*15)*bm);addMas((1+e.i.t)*(e.boss?5:1));S.beli+=(S.vip&&S.vip.bl?2:1)*Math.round((15+e.i.t*20)*bm*(S.faction==='pirate'?1.2:1));if(e.boss)bossDie(e);questKill(e);if(e.rd){const fg=e.boss?200:30;S.frag+=fg;popTxt(e.g.position,'+'+fg+' F','xp',9)}if(e.i.t>=9)sea2Loot(e);popTxt(e.g.position,'+'+(15+e.i.t*15)*bm+' XP','xp',7);popTxt(e.g.position,'+$'+Math.round((15+e.i.t*20)*bm*(S.faction==='pirate'?1.2:1)),'bl',8.8);burst(e.g.position.clone().setY(GY+2),10,0xffd23a,6);if(Math.random()<(e.boss?.25:.012+e.i.t*.002))fruitDrop(e)}}
 function fruitDrop(e){const k=pick(),dup=S.owned[k];S.owned[k]=1;if(dup)S.beli+=REFUND;const f=FR[k];banner('🍎 Quái rơi Trái '+f.n+'! ('+f.r+')');toast(dup?'Trùng Trái '+f.n+' → hoàn '+REFUND+' Beli':'Nhặt được Trái '+f.n+'! Mở Túi đồ để trang bị');burst(e.g.position.clone().setY(GY+2),30,f.c,10);sfx('light',1);save()}
 const UQ={on:0,t:0,cd:0,god:0},LG={cd:0};
 const H=(e,d)=>{kHit();if(e.cz>0&&e.alive)e.czD=(e.czD||0)+d;return hurt(e,d*L()*(S.vip&&S.vip.dm?2:1)*(AD.one?9999:1)*(UQ.on?3:1)*(S.kn>0?12:1)*(S.fruit==='chrono'&&S.sel==='fruit'?2.5:1)*((window.VF&&window.VF.on)?4:1)*(S.dr&&S.fruit==='dragonE'?3*(DR2.pw||1):1)*(window.SGm?SGm():1))};
@@ -2792,6 +2792,7 @@ function loop(){requestAnimationFrame(loop);
  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.l-=dt;p.m.position.addScaledVector(p.v,dt);p.m.scale.setScalar(p.s*Math.max(p.l/p.L,.01));if(p.l<=0){p.m.visible=false;SPOOL.push(p.m);parts.splice(i,1)}}
  // kẻ địch
  for(const e of en){
+  if(window.MPK&&MPK.mir(e)){MPK.tick(e,dt);continue}
   if(!e.alive){e.rt-=dt;if(e.rt<=0)spawnEnemy(e);continue}
   const dx=P.position.x-e.g.position.x,dz=P.position.z-e.g.position.z,d=Math.hypot(dx,dz);e.g.visible=d<CFG.ed;if(d>(KB.on?170:90)){e.bar.visible=false;continue}e.bar.visible=true;e.cd-=dt;e.flash-=dt;
   if(e.gj){e.g.rotation.y+=dt*.7}else if(e.frz>0)e.frz-=dt;
@@ -3416,7 +3417,8 @@ window.SKIN_LIST=[{"id": "classic", "name": "Hải Tặc Cổ Điển", "shirt":
   open:()=>openUI(),close:()=>closeUI(),
   create:()=>create(),join:c=>join(c),leave:()=>leave(),
   say:t=>say(t),emote:e=>emote(e),
-  get room(){return room},get myId(){return myId},get isHost(){return isHost}};
+  bc:o=>bcast(o),to:(id,o)=>{const c=conns.get(id);if(c&&c.open)try{c.send(o)}catch(_){}},
+  get room(){return room},get myId(){return myId},get isHost(){return isHost},get hostId(){return room?PFX+room:''}};
  window.MP=MP;
  try{MP.name=clean(localStorage.getItem(NAMEK),16)}catch(e){}
  if(!MP.name)MP.name='Thủy thủ '+(100+Math.floor(Math.random()*900));
@@ -3554,6 +3556,7 @@ window.SKIN_LIST=[{"id": "classic", "name": "Hải Tặc Cổ Điển", "shirt":
     m.f=typeof d.f==='string'?d.f:'';m.seen=Date.now();return;
    case 'c':{if(!m)return;const t=clean(d.m,120);if(!t)return;msg(m.n,t,false);emit('chat',{id,name:m.n,text:t,self:false});return}
    case 'e':{if(!m)return;const e=clean(d.e,8);if(!e)return;msg(m.n,e,false);emit('emote',{id,name:m.n,e,self:false});return}
+   case 'en':case 'hit':case 'kc':return emit('net',id,d);
    case 'full':fail('Phòng đã đầy (tối đa 8 người).');leave();return;
   }
  }
@@ -3785,6 +3788,79 @@ addEventListener('keydown',e=>{
   row.appendChild(sp);row.appendChild(b);box.insertBefore(row,box.firstChild);
  };
 })();
+
+/* ===== Đợt 20: đồng bộ quái & boss giữa bạn bè =====
+   Chủ phòng mô phỏng quái và gửi vị trí/máu; người khác hiển thị theo, không tự chạy AI.
+   Đòn đánh của người khác gửi về chủ phòng; chủ phòng báo lại người đánh chết quái để nhận thưởng. */
+const MPK={quiet:0,fwd:0};
+window.MPK=MPK;
+const mpr1=v=>Math.round(v*10)/10;
+MPK.mir=e=>!!(MP.room&&!MP.isHost&&e._tg&&e.rm&&performance.now()-e.rm<1500&&!e.rd&&!e.super);
+MPK.gate=(e,d)=>{
+ if(MPK.fwd||MPK.quiet||!MPK.mir(e))return false;
+ const i=en.indexOf(e);if(i<0)return false;
+ MP.to(MP.hostId,{t:'hit',i,d:mpr1(d)});
+ e.flash=.15;dmgPop(e.g.position,d);sfx('hit');
+ return true;
+};
+MPK.tick=(e,dt)=>{
+ const t=e._tg;if(!t)return;
+ e.mh=t.mh;e.hp=t.hp;
+ if(t.a){
+  if(!e.alive){e.alive=true;e.rt=0}
+  const dx=t.x-e.g.position.x,dy=t.y-e.g.position.y,dz=t.z-e.g.position.z;
+  if(dx*dx+dz*dz>900||Math.abs(dy)>12)e.g.position.set(t.x,t.y,t.z);
+  else{const k=1-Math.exp(-dt*9);e.g.position.x+=dx*k;e.g.position.y+=dy*k;e.g.position.z+=dz*k}
+  let q=t.r-e.g.rotation.y;q=Math.atan2(Math.sin(q),Math.cos(q));e.g.rotation.y+=q*(1-Math.exp(-dt*9));
+ }else e.alive=false;
+ const dP=Math.hypot(P.position.x-e.g.position.x,P.position.z-e.g.position.z);
+ e.g.visible=e.alive&&dP<CFG.ed;
+ e.bar.visible=e.alive&&dP<=90;
+ e.fg.scale.x=Math.max(.001,e.hp/e.mh);
+ e.bar.position.set(e.g.position.x,e.g.position.y+(e.boss?10:4.3),e.g.position.z);
+ e.bar.quaternion.copy(cam.quaternion);
+ e.flash-=dt;
+};
+// chủ phòng: gửi quái ở gần chủ phòng hoặc gần bạn bè cùng biển, 8 lần/giây
+setInterval(()=>{
+ if(!MP.room||!MP.isHost||!started||!MP.members.size)return;
+ const pts=[[P.position.x,P.position.z]];
+ MP.members.forEach(m=>{if(m.w===curSea)pts.push([m.x,m.z])});
+ const a=[];
+ for(let i=0;i<en.length;i++){
+  const e=en[i];if(!e||e.rd||e.super)continue;
+  const x=e.g.position.x,z=e.g.position.z;
+  if(!pts.some(p=>(p[0]-x)*(p[0]-x)+(p[1]-z)*(p[1]-z)<48400))continue;
+  a.push([i,mpr1(x),mpr1(e.g.position.y),mpr1(z),mpr1(e.hp),mpr1(e.mh),e.alive?1:0,+e.g.rotation.y.toFixed(2)]);
+ }
+ MP.bc({t:'en',n:en.length,a});
+},125);
+MP.on('net',(from,d)=>{
+ if(!started)return;
+ if(d.t==='en'){
+  if(from!==MP.hostId||MP.isHost||!Array.isArray(d.a)||d.n!==en.length)return;
+  const now=performance.now();
+  for(const r of d.a){
+   const e=en[r[0]];if(!e||e.rd||e.super)continue;
+   e._tg={x:+r[1]||0,y:+r[2]||0,z:+r[3]||0,hp:+r[4]||0,mh:+r[5]||1,a:r[6]===1,r:+r[7]||0};e.rm=now;
+  }
+  return;
+ }
+ if(d.t==='hit'){
+  if(!MP.isHost||!MP.members.has(from))return;
+  const i=d.i|0,e=en[i],dm=+d.d;
+  if(!e||!e.alive||e.rd||e.super||!(dm>0))return;
+  MPK.quiet=1;try{hurt(e,Math.min(dm,1e6))}finally{MPK.quiet=0}
+  if(!e.alive)MP.to(from,{t:'kc',i});
+  return;
+ }
+ if(d.t==='kc'){
+  if(from!==MP.hostId||MP.isHost)return;
+  const e=en[d.i|0];if(!e)return;
+  MPK.fwd=1;try{e.alive=true;e.hp=1;hurt(e,1)}finally{MPK.fwd=0}
+  return;
+ }
+});
 </script>
 </body>
 </html>
