@@ -3529,7 +3529,7 @@ window.SKIN_LIST=[{"id": "classic", "name": "Hải Tặc Cổ Điển", "shirt":
    try{c.send({t:'full'})}catch(_){}
    conns.delete(id);setTimeout(()=>{try{c.close()}catch(_){}},400);return;
   }
-  members.set(id,{n:nm,sk,w:0,x:0,y:0,z:0,r:0,dr:0,sl:0,hp:1,mh:1,lv:1,f:'',seen:Date.now()});
+  members.set(id,{n:nm,sk,w:0,x:0,y:0,z:0,r:0,dr:0,fr:'',sl:0,hp:1,mh:1,lv:1,f:'',seen:Date.now()});
   if(isHost&&!c._out){try{c.send({t:'ros',ids:[...members.keys()].filter(k=>k!==id)})}catch(_){}}
   if(!c._out){sys('👋 '+nm+' đã vào phòng');emit('join',id,nm)}
   render();
@@ -3553,7 +3553,7 @@ window.SKIN_LIST=[{"id": "classic", "name": "Hải Tặc Cổ Điển", "shirt":
     if(!m)return;
     m.w=d.w|0;m.x=+d.x||0;m.y=+d.y||0;m.z=+d.z||0;m.r=+d.r||0;
     m.dr=d.dr|0;m.sl=d.sl|0;m.hp=+d.hp||0;m.mh=+d.mh||1;m.lv=(d.lv|0)||1;
-    m.f=typeof d.f==='string'?d.f:'';m.seen=Date.now();return;
+    m.f=typeof d.f==='string'?d.f:'';m.fr=typeof d.fr==='string'?d.fr:'';m.seen=Date.now();return;
    case 'c':{if(!m)return;const t=clean(d.m,120);if(!t)return;msg(m.n,t,false);emit('chat',{id,name:m.n,text:t,self:false});return}
    case 'e':{if(!m)return;const e=clean(d.e,8);if(!e)return;msg(m.n,e,false);emit('emote',{id,name:m.n,e,self:false});return}
    case 'en':case 'hit':case 'kc':return emit('net',id,d);
@@ -3725,6 +3725,10 @@ function mpFrame(){
   const bk=m.sk+'|'+m.f;
   if(o.bkey!==bk){o.bkey=bk;o.g.remove(o.h);mpD(o.h);o.h=mpHuman(m);o.g.add(o.h)}
   mpLabel(o,m);
+  // biến hình rồng: ẩn thân người, dựng mô hình rồng đúng loại trái
+  const dk=m.dr&&(m.fr==='dragon'||m.fr==='dragonE')?m.fr:'';
+  if(o.dk!==dk){if(o.dg){o.g.remove(o.dg);mpD(o.dg);o.dg=null}if(dk){o.dg=dk==='dragonE'?eastDragon():westDragon();o.g.add(o.dg)}o.dk=dk}
+  o.h.visible=!dk;
   const vis=!!started&&m.w>0&&m.w===curSea;
   o.g.visible=vis;o.hb.visible=vis;
   if(!vis){o.first=true;return}
@@ -3746,13 +3750,13 @@ function mpFrame(){
  });
  MPR.forEach((o,id)=>{
   if(MP.members.has(id))return;
-  scene.remove(o.g);scene.remove(o.hb);mpD(o.g);mpD(o.hb);MPR.delete(id);
+  scene.remove(o.g);scene.remove(o.hb);mpD(o.g);mpD(o.hb);if(o.dg)mpD(o.dg);MPR.delete(id);
  });
  if(MPLB.bt>0){MPLB.bt-=dr;if(MPLB.bt<=0&&MPLB.bub){MPLB.par.remove(MPLB.bub);mpD(MPLB.bub);MPLB.bub=null}}
  MPR.forEach(o=>{if(o.bt>0){o.bt-=dr;if(o.bt<=0&&o.bub){o.par.remove(o.bub);mpD(o.bub);o.bub=null}}});
 }
 // trạng thái gửi cho bạn bè (chỉ có vị trí khi đang ở trong game)
-MP.local=()=>started?{w:curSea,x:+P.position.x.toFixed(2),y:+P.position.y.toFixed(2),z:+P.position.z.toFixed(2),r:+P.rotation.y.toFixed(3),dr:S.dr?1:0,sl:sailing?1:0,hp:Math.ceil(S.hp),mh:Math.ceil(mhp()),lv:S.lv,f:S.faction||''}:{w:0};
+MP.local=()=>started?{w:curSea,x:+P.position.x.toFixed(2),y:+P.position.y.toFixed(2),z:+P.position.z.toFixed(2),r:+P.rotation.y.toFixed(3),dr:S.dr?1:0,fr:S.dr?(S.fruit||''):'',sl:sailing?1:0,hp:Math.ceil(S.hp),mh:Math.ceil(mhp()),lv:S.lv,f:S.faction||''}:{w:0};
 MP.on('join',(id,n)=>{if(started)toast('👋 '+n+' đã vào phòng')});
 MP.on('leave',(id,n)=>{if(started)toast('👋 '+n+' đã rời phòng')});
 MP.on('error',m=>{if(started)toast(m)});
